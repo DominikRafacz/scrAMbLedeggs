@@ -7,3 +7,14 @@ renv::activate()
 renv::restore()
 targets::tar_make()
 ```
+
+# Datasets used:
+
+## breast
+
+Dataset comes from
+[UCI](https://archive.ics.uci.edu/ml/datasets/breast+cancer+wisconsin+(original)).
+
+We are using wdbc.data file with features 2-12. The first one is target: 1 (malignant) or 0 (benign). All the others are numeric variables.
+
+
