@@ -6,7 +6,7 @@ IRLS <- function(X, y) {
   p <- rep(0.5, n)
   beta <- matrix(0, nrow = ncol(X))
 
-  for (i in 1:1000) {
+  for (i in 1:10) {
     beta <- beta + solve(t(X) %*% diag(as.vector(p * (1 - p))) %*% X) %*% t(X) %*% (y - p)
     p <- 1 / (1 + exp(-X %*% beta))
   }
