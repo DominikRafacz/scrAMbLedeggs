@@ -11,5 +11,5 @@ IRLS <- function(X, y) {
     p <- 1 / (1 + exp(-X %*% beta))
   }
 
-  beta
+  structure(list(beta = beta), class = c("IRLS", "scrAMbodeL"))
 }
