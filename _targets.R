@@ -7,7 +7,7 @@ source("R/IRLS.R")
 source("R/measures.R")
 source("R/predict.R")
 source("R/cv.R")
-source("R/transofrm.R")
+source("R/transform.R")
 
 tar_option_set(
   packages = c(
