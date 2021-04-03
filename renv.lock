@@ -114,6 +114,13 @@
       "Repository": "CRAN",
       "Hash": "fea074fb67fe4c25d47ad09087da847d"
     },
+    "fs": {
+      "Package": "fs",
+      "Version": "1.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "44594a07a42e5f91fac9f93fda6d0109"
+    },
     "generics": {
       "Package": "generics",
       "Version": "0.1.0",
@@ -134,6 +141,18 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "bf552cdd96f5969873afdac7311c7d0d"
+    },
+    "icecream": {
+      "Package": "icecream",
+      "Version": "0.0.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "icecream",
+      "RemoteUsername": "DominikRafacz",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "fe17be13b35e52d6215be08a003ca25b1d92e1ea",
+      "Hash": "12c64fe0523876d9b582e335d44d6333"
     },
     "igraph": {
       "Package": "igraph",
@@ -218,6 +237,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "599df23c40a4fce9c7b4764f28c37857"
+    },
+    "tarchetypes": {
+      "Package": "tarchetypes",
+      "Version": "0.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "65a7e43f16ebb046fadfa6aeb2a69253"
     },
     "targets": {
       "Package": "targets",
