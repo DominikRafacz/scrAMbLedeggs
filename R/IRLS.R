@@ -7,7 +7,9 @@ IRLS <- function(X, y, max_iter = 10) {
   beta <- matrix(0, nrow = ncol(X))
 
   for (i in seq_len(max_iter)) {
-    beta <- beta + solve(t(X) %*% diag(as.vector(p * (1 - p))) %*% X) %*% t(X) %*% (y - p)
+    tryCatch({inverse <- solve(t(X) %*% diag(as.vector(p * (1 - p))) %*% X)},
+             error = {break})
+    beta <- beta + inverse %*% t(X) %*% (y - p)
     p <- 1 / (1 + exp(-X %*% beta))
   }
 
