@@ -32,10 +32,11 @@ list(
   tar_target(y_breast, dataset_raw_breast[, 1] == "M"),
 
   #creditg
-  tar_target(dataset_raw_creditg, read_csv(dataset_raw_file_creditg)),
   tar_target(dataset_raw_file_creditg, "data/credit-g.csv", format = "file"),
+  tar_target(dataset_raw_creditg, read_csv(dataset_raw_file_creditg)),
   tar_target(X_creditg, dataset_raw_creditg[, -21] %>%
-               mutate(across(where(is.character), dummify))),
+               mutate(across(where(is.character), dummify)) %>%
+               map_dfc(identity)),
   tar_target(y_creditg, dataset_raw_creditg[, 21] == "bad"),
 
   tar_map(list(
