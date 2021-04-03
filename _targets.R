@@ -2,6 +2,7 @@ library(targets)
 library(tarchetypes)
 
 source("R/GD.R")
+source("R/SGD.R")
 source("R/IRLS.R")
 source("R/measures.R")
 source("R/predict.R")
@@ -20,7 +21,7 @@ tar_option_set(
 )
 
 dataset_names <- c("breast", "creditg")
-algorithm_names <- c("GD", "IRLS")
+algorithm_names <- c("GD", "IRLS", "SGD")
 
 set.seed(2137)
 list(
