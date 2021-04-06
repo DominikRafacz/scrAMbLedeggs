@@ -21,3 +21,7 @@ We are using wdbc.data file with features 2-12. The first one is target: 1 (mali
 
 Downloaded using OpenML:
 [credit-g](https://www.openml.org/d/31)
+
+## wells
+
+Dataset from [Oil and Gas Authority Open Data](https://data-ogauthority.opendata.arcgis.com/datasets/oga-exploration-and-appraisal-wells).

@@ -19,11 +19,12 @@ tar_option_set(
     "purrr",
     "dplyr",
     "readr",
-    "tidyr"
+    "tidyr",
+    "biogram"
   )
 )
 
-dataset_names <- c("breast", "creditg", "wells")
+dataset_names <- c("breast", "creditg", "wells", "amp")
 scaled_names <- c("unscaled", "scaled")
 algorithm_names <- c("GD", "IRLS", "SGD")
 
@@ -63,6 +64,24 @@ list(
                        tolower(y)
                      })),
   tar_target(wells_data_scaled, scale(wells_data_unscaled)),
+  
+  ##amp
+  tar_target(amp_data_unscaled,
+             dataset("amp",
+                     target_index = 10, positive_class = "YES",
+                     X_processing = function(X) {
+                       X %>%
+                         pull(Sequence) %>%
+                         strsplit("") %>%
+                         map(function(sequence) {
+                           count_ngrams(sequence, n = 2, u = LETTERS) %>%
+                             as.matrix() %>%
+                             as_tibble()
+                         }) %>%
+                         bind_rows() %>%
+                         select(where(~any(.x != 0)))
+                     })),
+  tar_target(amp_data_scaled, scale(amp_data_unscaled)),
   
   #crossvalidating algorithms
   
