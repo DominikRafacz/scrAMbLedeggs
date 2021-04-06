@@ -13,7 +13,8 @@ perform_CV <- function(algorithm, dataset, num_folds = 5, ...) {
   map_measure <- function(measure) function(ind) measure(y[-inds[[ind]]], predictions[[ind]]$prediction)
 
   tibble(fold = 1:num_folds) %>%
-    mutate(dataset = attr(dataset, "name"),
+    mutate(data = attr(dataset, "name"),
+           scaled = attr(dataset, "scaled"),
            algorithm = as_label(algorithm_name),
            accuracy = map_dbl(fold, map_measure(accuracy)),
            precision = map_dbl(fold, map_measure(precision)),

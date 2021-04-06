@@ -11,5 +11,13 @@ dataset <- function(name,
 
   structure(list(X = X, y = y),
             name = name,
+            scaled = FALSE,
             class = c("dataset", "list"))
+}
+
+scale.dataset <- function(x, center = TRUE, scale = TRUE) {
+  x[["X"]] <- x[["X"]] %>%
+    mutate(across(.fns = ~(.x - mean(.x))/sd(.x)))
+  attr(x, "scaled") <- TRUE
+  x
 }
