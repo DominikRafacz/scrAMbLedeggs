@@ -12,18 +12,32 @@ source("R/transform.R")
 
 tar_option_set(
   packages = c(
-    "icecream",
-    "ggplot2",
-    "tibble",
-    "rlang",
-    "purrr",
+    "biogram",
     "dplyr",
-    "readr",
-    "tidyr",
+    "fs",
+    "ggplot2",
+    "icecream",
     "knitr",
-    "fs"
-  )
+    "purrr",
+    "readr",
+    "rlang",
+    "tibble",
+    "tidyr")
 )
+
+# imported functions -- to keep track what are their origins
+# dplyr::bind_rows
+# dplyr::mutate
+# dplyr::select
+# dplyr::pull
+# ggplot2::ggplot
+# purrr::map_dfc
+# rlang::exec
+# rlang::syms
+# tidyr::expand_grid
+# tidyr::pivot_longer
+
+
 
 dataset_names <- c("breast", "creditg", "wells", "amp")
 scaled_names <- c("unscaled", "scaled")
@@ -49,7 +63,7 @@ list(
                          remove_correlated()
                      })),
   tar_target(creditg_data_scaled, scale(creditg_data_unscaled)),
-  
+
   ##wells
   tar_target(wells_data_unscaled,
              dataset("wells",
@@ -66,7 +80,7 @@ list(
                        tolower(y)
                      })),
   tar_target(wells_data_scaled, scale(wells_data_unscaled)),
-  
+
   ##amp
   tar_target(amp_data_unscaled,
              dataset("amp",
@@ -84,19 +98,19 @@ list(
                          select(where(~any(.x != 0)))
                      })),
   tar_target(amp_data_scaled, scale(amp_data_unscaled)),
-  
+
   #crossvalidating algorithms
 
   tar_map(
     list(
-      algorithm = rlang::syms(rep(algorithm_names, each = length(dataset_names) * length(scaled_names))),
-      dataset = rlang::syms(rep(paste0(
+      algorithm = syms(rep(algorithm_names, each = length(dataset_names) * length(scaled_names))),
+      dataset = syms(rep(paste0(
         rep(dataset_names, each = length(scaled_names)), "_data_", scaled_names),
         times = length(algorithm_names)))),
     tar_target(CV, perform_CV(algorithm, dataset))
   ),
   tar_map(
-    list(CV = rlang::syms(rlang::exec(paste0, !!!tidyr::expand_grid("CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names)))),
+    list(CV = syms(exec(paste0, !!!expand_grid("CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names)))),
     tar_target(
       aggregated,
       CV %>%
@@ -106,14 +120,14 @@ list(
   ),
 
   ##aggregating results
-  tar_target(bound_aggregates, bind_rows(!!!rlang::syms(rlang::exec(
-    paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names))))),
+  tar_target(bound_aggregates, bind_rows(!!!syms(exec(
+    paste0, !!!expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names))))),
 
   ##visualizing results
   tar_target(CV_plot_scaled,
              ggplot(bound_aggregates %>%
                       filter(scaled) %>%
-                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
+                      pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
@@ -122,7 +136,7 @@ list(
   tar_target(CV_plot_unscaled,
              ggplot(bound_aggregates %>%
                       filter(!scaled) %>%
-                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
+                      pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
