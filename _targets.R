@@ -43,7 +43,8 @@ list(
                      X_processing = function(X) {
                        X %>%
                          mutate(across(where(is.character), dummify)) %>%
-                         map_dfc(identity)
+                         map_dfc(identity) %>%
+                         remove_correlated()
                      })),
   tar_target(creditg_data_scaled, scale(creditg_data_unscaled)),
   
