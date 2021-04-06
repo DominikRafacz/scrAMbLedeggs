@@ -55,5 +55,7 @@ list(
       aggregated,
       CV %>%
         select(-fold) %>%
-        summarise(across(everything(), mean))))
+        summarise(across(everything(), mean)))),
+
+  tar_target(bound_aggregates, bind_rows(!!!rlang::syms(rlang::exec(paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names)))))
   )
