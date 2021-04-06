@@ -28,12 +28,13 @@ algorithm_names <- c("GD", "IRLS", "SGD")
 
 set.seed(2137)
 list(
-  #breast
+  #data loading and preparation
+  ##breast
   tar_target(breast_data,
              dataset("breast",
                      target_index = 1, positive_class = "M")),
 
-  #creditg
+  ##creditg
   tar_target(creditg_data,
              dataset("creditg", path = "data/credit-g.csv",
                      target_index = 21, positive_class = "bad",
@@ -43,19 +44,24 @@ list(
                          map_dfc(identity)
                      })),
 
+  #crossvalidating algorithms
   tar_map(
     list(
       algorithm = rlang::syms(rep(algorithm_names, each = length(dataset_names))),
       dataset = rlang::syms(rep(paste0(dataset_names, "_data"), times = length(algorithm_names)))),
-    tar_target(CV, perform_CV(algorithm, dataset))),
-
+    tar_target(CV, perform_CV(algorithm, dataset))
+    ),
   tar_map(
     list(CV = rlang::syms(rlang::exec(paste0, !!!tidyr::expand_grid("CV_", algorithm_names, "_", dataset_names, "_data")))),
     tar_target(
       aggregated,
       CV %>%
         select(-fold) %>%
-        summarise(across(everything(), mean)))),
+        group_by(dataset, algorithm) %>%
+        summarise(across(everything(), mean), .groups = "drop"))
+    ),
+
+  ##aggregating results
   tar_target(bound_aggregates, bind_rows(!!!rlang::syms(rlang::exec(paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data")))))
 
   )
