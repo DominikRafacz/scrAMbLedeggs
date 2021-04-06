@@ -9,6 +9,7 @@ source("R/dataset.R")
 source("R/predict.R")
 source("R/cv.R")
 source("R/transform.R")
+source("R/null_model.R")
 
 tar_option_set(
   packages = c(
@@ -36,7 +37,7 @@ list(
              dataset("breast",
                      target_index = 1, positive_class = "M")),
   tar_target(breast_data_scaled, scale(breast_data_unscaled)),
-
+  
   ##creditg
   tar_target(creditg_data_unscaled,
              dataset("creditg", path = "data/credit-g.csv",
@@ -90,8 +91,15 @@ list(
                      target_index = 21, positive_class = "1")),
   tar_target(twonorm_data_scaled, scale(twonorm_data_unscaled)),
   
+  #null models
+  tar_map(
+    list(dataset = rlang::syms(paste0(
+      rep(dataset_names, each = length(scaled_names)), "_data_", scaled_names))),
+    tar_target(null_model, null_model(dataset)),
+    tar_target(null_log_likelihood, log_likelihood(null_model))
+  ),
+  
   #crossvalidating algorithms
-
   tar_map(
     list(
       algorithm = rlang::syms(rep(algorithm_names, each = length(dataset_names) * length(scaled_names))),
@@ -109,11 +117,11 @@ list(
         group_by(data, algorithm, scaled) %>%
         summarise(across(everything(), mean), .groups = "drop"))
   ),
-
+  
   ##aggregating results
   tar_target(bound_aggregates, bind_rows(!!!rlang::syms(rlang::exec(
     paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names))))),
-
+  
   ##visualizing results
   tar_target(CV_plot_scaled,
              ggplot(bound_aggregates %>%
