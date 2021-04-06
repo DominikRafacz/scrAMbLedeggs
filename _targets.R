@@ -29,6 +29,12 @@ dataset_names <- c("breast", "creditg", "wells", "amp", "twonorm")
 scaled_names <- c("unscaled", "scaled")
 algorithm_names <- c("GD", "IRLS", "SGD")
 
+paste_dataset_names <- function() {
+  rep(paste0(
+    rep(dataset_names, each = length(scaled_names)), "_data_", scaled_names),
+    times = length(algorithm_names))
+}
+
 set.seed(2137)
 list(
   #data loading and preparation
@@ -91,22 +97,13 @@ list(
                      target_index = 21, positive_class = "1")),
   tar_target(twonorm_data_scaled, scale(twonorm_data_unscaled)),
   
-  #null models
-  tar_map(
-    list(dataset = rlang::syms(paste0(
-      rep(dataset_names, each = length(scaled_names)), "_data_", scaled_names))),
-    tar_target(null_model, null_model(dataset)),
-    tar_target(null_log_likelihood, log_likelihood(null_model))
-  ),
-  
   #crossvalidating algorithms
   tar_map(
     list(
-      algorithm = rlang::syms(rep(algorithm_names, each = length(dataset_names) * length(scaled_names))),
-      dataset = rlang::syms(rep(paste0(
-        rep(dataset_names, each = length(scaled_names)), "_data_", scaled_names),
-        times = length(algorithm_names)))),
-    tar_target(CV, perform_CV(algorithm, dataset)),
+      algorithm_name = rlang::syms(rep(algorithm_names, each = length(dataset_names) * length(scaled_names))),
+      dataset = rlang::syms(paste_dataset_names())),
+    names = c("algorithm_name", "dataset"),
+    tar_target(CV, perform_CV(algorithm_name, dataset)),
     tar_target(aggregated_CV, CV %>%
                  select(-fold) %>%
                  group_by(data, algorithm, scaled) %>%
@@ -121,7 +118,7 @@ list(
   tar_target(CV_plot_scaled,
              ggplot(bound_aggregates %>%
                       filter(scaled) %>%
-                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
+                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure, R2)),
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
@@ -130,7 +127,7 @@ list(
   tar_target(CV_plot_unscaled,
              ggplot(bound_aggregates %>%
                       filter(!scaled) %>%
-                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
+                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure, R2)),
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +

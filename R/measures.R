@@ -15,3 +15,7 @@ F_measure <- function(label, prediction, beta = 1) {
   recall_score <- recall(label, prediction)
   (1 + beta^2) * prec_score * recall_score / (beta^2 * prec_score + recall_score)
 }
+
+log_likelihood <- function(label, probability) {
+  sum((label - probability) ^ 2)
+}
