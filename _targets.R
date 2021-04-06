@@ -69,5 +69,15 @@ list(
   
   ##aggregating results
   tar_target(bound_aggregates, bind_rows(!!!rlang::syms(rlang::exec(
-    paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names)))))
+    paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names))))),
+  
+  ##visualizing results
+  tar_target(CV_plot,
+             ggplot(bound_aggregates %>%
+                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
+                    aes(x = dataset, y = value, group = algorithm, fill = algorithm)) +
+               geom_bar(stat = "identity", position = "dodge") +
+               facet_wrap(~name, ) +
+               ggtitle("Comparison of measures for algorithms and datasets") +
+               theme_bw())
 )
