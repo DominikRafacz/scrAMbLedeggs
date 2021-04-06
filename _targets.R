@@ -13,6 +13,7 @@ source("R/transform.R")
 tar_option_set(
   packages = c(
     "icecream",
+    "ggplot2",
     "tibble",
     "rlang",
     "purrr",
@@ -31,7 +32,7 @@ list(
   tar_target(breast_data,
              dataset("breast",
                      target_index = 1, positive_class = "M")),
-  
+
   #creditg
   tar_target(creditg_data,
              dataset("creditg", path = "data/credit-g.csv",
@@ -41,7 +42,7 @@ list(
                          mutate(across(where(is.character), dummify)) %>%
                          map_dfc(identity)
                      })),
-  
+
   tar_map(
     list(
       algorithm = rlang::syms(rep(algorithm_names, each = length(dataset_names))),
@@ -55,6 +56,6 @@ list(
       CV %>%
         select(-fold) %>%
         summarise(across(everything(), mean)))),
-
   tar_target(bound_aggregates, bind_rows(!!!rlang::syms(rlang::exec(paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data")))))
+
   )
