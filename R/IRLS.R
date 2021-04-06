@@ -9,11 +9,11 @@ IRLS <- function(X, y, max_iter = 100, min_iter = 10) {
   for (i in seq_len(max_iter)) {
     inverse <-  tryCatch(solve(t(X) %*% diag(as.vector(p * (1 - p))) %*% X),
                          error = function(e) "singular")
-    if (inverse == "singular") {
+    if (length(inverse) == 1 && inverse == "singular") {
       if (i <= min_iter) {
         inverse <-  tryCatch(solve(t(X) %*% diag(as.vector(p * (1 - p))) %*% X + diag(1e-7, nrow = ncol(X))),
                              error = function(e) "singular")
-        if (inverse == "singular") break
+        if (length(inverse) == 1 && inverse == "singular") break
       } else break
     }
 

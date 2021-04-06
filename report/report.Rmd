@@ -1,0 +1,17 @@
+---
+author: Laura Bąkała, Dominik Rafacz
+title: Report
+output: pdf_document
+---
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      echo = FALSE)
+```
+
+
+```{r}
+library(targets)
+tar_read(CV_plot_unscaled)
+tar_read(CV_plot_scaled)
+```
