@@ -4,10 +4,10 @@ dataset <- function(name,
                     positive_class,
                     X_processing = identity,
                     y_processing = identity) {
-  data <- read_csv(path)
+  data <- read_csv(path, na = c("n/a", ""))
 
   X <- X_processing(data[, -target_index])
-  y <- y_processing(pull(data, target_index) == positive_class)
+  y <- y_processing(pull(data, target_index)) == positive_class
 
   structure(list(X = X, y = y),
             name = name,
