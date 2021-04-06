@@ -5,6 +5,7 @@ source("R/GD.R")
 source("R/SGD.R")
 source("R/IRLS.R")
 source("R/measures.R")
+source("R/adapters.R")
 source("R/dataset.R")
 source("R/predict.R")
 source("R/cv.R")
@@ -13,17 +14,23 @@ source("R/transform.R")
 tar_option_set(
   packages = c(
     "biogram",
-    "dplyr",
+    "e1071",
     "fs",
     "ggplot2",
     "icecream",
     "knitr",
+    "MASS",
     "purrr",
     "readr",
     "rlang",
     "tibble",
-    "tidyr")
+    "tidyr",
+    "dplyr"
+    )
 )
+
+library(rlang)
+library(tidyr)
 
 # imported functions -- to keep track what are their origins
 # dplyr::bind_rows
@@ -39,7 +46,7 @@ tar_option_set(
 
 dataset_names <- c("breast", "creditg", "wells", "amp", "twonorm")
 scaled_names <- c("unscaled", "scaled")
-algorithm_names <- c("GD", "IRLS", "SGD")
+algorithm_names <- c("GD", "IRLS", "SGD", "KNN", "LDA", "QDA")
 
 set.seed(2137)
 list(
@@ -58,7 +65,8 @@ list(
                        X %>%
                          mutate(across(where(is.character), dummify)) %>%
                          map_dfc(identity) %>%
-                         remove_correlated()
+                         remove_correlated() %>%
+                         select(-`purpose_domestic appliance`, -purpose_repairs, -purpose_other, -purpose_retraining)
                      })),
   tar_target(creditg_data_scaled, scale(creditg_data_unscaled)),
 
@@ -71,8 +79,11 @@ list(
                          select(!ends_with(c("name", "choke", "id", "no", "date", "op", "age")), -Comments) %>%
                          mutate(across(where(is.numeric), ~replace(.x, is.na(.x), median(.x, na.rm = FALSE)))) %>%
                          select(where(~!anyNA(.x))) %>%
+                         select(-Rig_Datum) %>%
                          mutate(across(where(is.character), dummify)) %>%
-                         map_dfc(identity)
+                         map_dfc(identity) %>%
+                         remove_correlated() %>%
+                         select(-Mech_Stat_AB1, -Mech_Stat_Completed, -`Mech_Stat_Completed (Shut In)`, -`Mech_Stat_Plugged`, -Mech_Stat_AB2)
                      },
                      y_processing = function(y) {
                        tolower(y)
@@ -93,16 +104,25 @@ list(
                              as_tibble()
                          }) %>%
                          bind_rows() %>%
-                         select(where(~any(.x != 0)))
+                         select(where(~any(.x != 0))) %>%
+                         select(-c(7, 21, 32, 40, 41, 49, 57, 61, 62, 70, 74, 82, 90, 91, 101,
+                                   124, 125, 126, 127, 129, 132, 135, 136, 140, 141, 148, 155, 168,
+                                   172, 188, 200, 202, 203, 205, 206, 207, 208, 209, 210, 211, 212,
+                                   213, 214, 215, 217, 218, 219, 220, 221, 224, 225, 232, 235, 240,
+                                   245, 246, 248, 252, 260, 266, 268, 272, 278, 280, 291, 292, 293,
+                                   294, 295, 296, 298, 300, 303, 309, 310, 321, 329, 342, 343, 362,
+                                   365, 366, 367, 370, 373, 374, 375, 376, 377, 378, 379, 380, 381,
+                                   382, 383, 384, 385, 386, 387, 393, 397)
+                                )
                      })),
   tar_target(amp_data_scaled, scale(amp_data_unscaled)),
-  
+
   ##twonorm
   tar_target(twonorm_data_unscaled,
              dataset("twonorm",
                      target_index = 21, positive_class = "1")),
   tar_target(twonorm_data_scaled, scale(twonorm_data_unscaled)),
-  
+
   #crossvalidating algorithms
 
   tar_map(

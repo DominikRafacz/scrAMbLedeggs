@@ -4,7 +4,7 @@ title: Report
 output: pdf_document
 ---
 
-```{r}
+```{r echo=FALSE}
 knitr::opts_chunk$set(warning = FALSE,
                       echo = FALSE)
 ```
