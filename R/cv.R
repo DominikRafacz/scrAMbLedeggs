@@ -1,4 +1,5 @@
 perform_CV <- function(algorithm, dataset, num_folds = 5, ...) {
+  algorithm_name <- enquo(algorithm)
   X <- dataset[["X"]]
   y <- dataset[["y"]]
   n <- nrow(X)
@@ -12,7 +13,9 @@ perform_CV <- function(algorithm, dataset, num_folds = 5, ...) {
   map_measure <- function(measure) function(ind) measure(y[-inds[[ind]]], predictions[[ind]]$prediction)
 
   tibble(fold = 1:num_folds) %>%
-    mutate(accuracy = map_dbl(fold, map_measure(accuracy)),
+    mutate(dataset = attr(dataset, "name"),
+           algorithm = as_label(algorithm_name),
+           accuracy = map_dbl(fold, map_measure(accuracy)),
            precision = map_dbl(fold, map_measure(precision)),
            recall = map_dbl(fold, map_measure(recall)),
            F_measure = map_dbl(fold, map_measure(F_measure)))
