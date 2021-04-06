@@ -36,7 +36,7 @@ list(
              dataset("breast",
                      target_index = 1, positive_class = "M")),
   tar_target(breast_data_scaled, scale(breast_data_unscaled)),
-  
+
   ##creditg
   tar_target(creditg_data_unscaled,
              dataset("creditg", path = "data/credit-g.csv",
@@ -44,7 +44,8 @@ list(
                      X_processing = function(X) {
                        X %>%
                          mutate(across(where(is.character), dummify)) %>%
-                         map_dfc(identity)
+                         map_dfc(identity) %>%
+                         remove_correlated()
                      })),
   tar_target(creditg_data_scaled, scale(creditg_data_unscaled)),
   
@@ -84,7 +85,7 @@ list(
   tar_target(amp_data_scaled, scale(amp_data_unscaled)),
   
   #crossvalidating algorithms
-  
+
   tar_map(
     list(
       algorithm = rlang::syms(rep(algorithm_names, each = length(dataset_names) * length(scaled_names))),
@@ -102,16 +103,26 @@ list(
         group_by(data, algorithm, scaled) %>%
         summarise(across(everything(), mean), .groups = "drop"))
   ),
-  
+
   ##aggregating results
   tar_target(bound_aggregates, bind_rows(!!!rlang::syms(rlang::exec(
     paste0, !!!tidyr::expand_grid("aggregated_CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names))))),
-  
+
   ##visualizing results
-  tar_target(CV_plot,
+  tar_target(CV_plot_scaled,
              ggplot(bound_aggregates %>%
+                      filter(scaled) %>%
                       tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
-                    aes(x = dataset, y = value, group = algorithm, fill = algorithm)) +
+                    aes(x = data, y = value, group = algorithm, fill = algorithm)) +
+               geom_bar(stat = "identity", position = "dodge") +
+               facet_wrap(~name, ) +
+               ggtitle("Comparison of measures for algorithms and datasets") +
+               theme_bw()),
+  tar_target(CV_plot_unscaled,
+             ggplot(bound_aggregates %>%
+                      filter(!scaled) %>%
+                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
+                    aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
                ggtitle("Comparison of measures for algorithms and datasets") +
