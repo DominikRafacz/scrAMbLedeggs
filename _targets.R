@@ -19,7 +19,9 @@ tar_option_set(
     "purrr",
     "dplyr",
     "readr",
-    "tidyr"
+    "tidyr",
+    "knitr",
+    "fs"
   )
 )
 
@@ -90,5 +92,7 @@ list(
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
                ggtitle("Comparison of measures for algorithms and datasets") +
-               theme_bw())
+               theme_bw()),
+
+  tar_render(report, "report/report.Rmd")
 )
