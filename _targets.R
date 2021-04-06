@@ -25,7 +25,7 @@ tar_option_set(
   )
 )
 
-dataset_names <- c("breast", "creditg")
+dataset_names <- c("breast", "creditg", "wells", "amp")
 scaled_names <- c("unscaled", "scaled")
 algorithm_names <- c("GD", "IRLS", "SGD")
 
@@ -49,7 +49,42 @@ list(
                          remove_correlated()
                      })),
   tar_target(creditg_data_scaled, scale(creditg_data_unscaled)),
-
+  
+  ##wells
+  tar_target(wells_data_unscaled,
+             dataset("wells",
+                     target_index = 5, positive_class = "exploration",
+                     X_processing = function(X) {
+                       X %>%
+                         select(!ends_with(c("name", "choke", "id", "no", "date", "op", "age")), -Comments) %>%
+                         mutate(across(where(is.numeric), ~replace(.x, is.na(.x), median(.x, na.rm = FALSE)))) %>%
+                         select(where(~!anyNA(.x))) %>%
+                         mutate(across(where(is.character), dummify)) %>%
+                         map_dfc(identity)
+                     },
+                     y_processing = function(y) {
+                       tolower(y)
+                     })),
+  tar_target(wells_data_scaled, scale(wells_data_unscaled)),
+  
+  ##amp
+  tar_target(amp_data_unscaled,
+             dataset("amp",
+                     target_index = 10, positive_class = "YES",
+                     X_processing = function(X) {
+                       X %>%
+                         pull(Sequence) %>%
+                         strsplit("") %>%
+                         map(function(sequence) {
+                           count_ngrams(sequence, n = 2, u = LETTERS) %>%
+                             as.matrix() %>%
+                             as_tibble()
+                         }) %>%
+                         bind_rows() %>%
+                         select(where(~any(.x != 0)))
+                     })),
+  tar_target(amp_data_scaled, scale(amp_data_unscaled)),
+  
   #crossvalidating algorithms
 
   tar_map(
