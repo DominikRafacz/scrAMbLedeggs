@@ -37,9 +37,7 @@ tar_option_set(
 # tidyr::expand_grid
 # tidyr::pivot_longer
 
-
-
-dataset_names <- c("breast", "creditg", "wells", "amp")
+dataset_names <- c("breast", "creditg", "wells", "amp", "twonorm")
 scaled_names <- c("unscaled", "scaled")
 algorithm_names <- c("GD", "IRLS", "SGD")
 
@@ -98,7 +96,13 @@ list(
                          select(where(~any(.x != 0)))
                      })),
   tar_target(amp_data_scaled, scale(amp_data_unscaled)),
-
+  
+  ##twonorm
+  tar_target(twonorm_data_unscaled,
+             dataset("twonorm",
+                     target_index = 21, positive_class = "1")),
+  tar_target(twonorm_data_scaled, scale(twonorm_data_unscaled)),
+  
   #crossvalidating algorithms
 
   tar_map(
