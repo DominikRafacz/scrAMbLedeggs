@@ -106,16 +106,11 @@ list(
       dataset = rlang::syms(rep(paste0(
         rep(dataset_names, each = length(scaled_names)), "_data_", scaled_names),
         times = length(algorithm_names)))),
-    tar_target(CV, perform_CV(algorithm, dataset))
-  ),
-  tar_map(
-    list(CV = rlang::syms(rlang::exec(paste0, !!!tidyr::expand_grid("CV_", algorithm_names, "_", dataset_names, "_data_", scaled_names)))),
-    tar_target(
-      aggregated,
-      CV %>%
-        select(-fold) %>%
-        group_by(data, algorithm, scaled) %>%
-        summarise(across(everything(), mean), .groups = "drop"))
+    tar_target(CV, perform_CV(algorithm, dataset)),
+    tar_target(aggregated_CV, CV %>%
+                 select(-fold) %>%
+                 group_by(data, algorithm, scaled) %>%
+                 summarise(across(everything(), mean), .groups = "drop"))
   ),
   
   ##aggregating results
