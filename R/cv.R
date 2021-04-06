@@ -1,4 +1,6 @@
-perform_CV <- function(algorithm, X, y, num_folds = 5, ...) {
+perform_CV <- function(algorithm, dataset, num_folds = 5, ...) {
+  X <- dataset[["X"]]
+  y <- dataset[["y"]]
   n <- nrow(X)
   inds <- sample(1:n)
   inds <- map(1:num_folds, function(ind) inds[seq(from = ind, to = n, by = num_folds)])
