@@ -13,7 +13,7 @@ SGD <- function(X, y, max_iter = 10, learning_rate = .01) {
       # as.numeric converts 1x1 matrix to scalar
       prediction <- as.numeric(1 / (1 + exp(-X[j, ] %*% beta)))
       first_derivative <- X[j, ] * (y[j] - prediction)
-      beta <- beta - learning_rate * first_derivative
+      beta <- beta + learning_rate * first_derivative
     }
   }
   

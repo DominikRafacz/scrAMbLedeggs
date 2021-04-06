@@ -8,7 +8,7 @@ GD <- function(X, y, max_iter = 1000, learning_rate = .01) {
   for (i in seq_len(max_iter)) {
     first_derivative <- t(X) %*% (y - p)
     # optimal learning rate could be computed for each iteration separately
-    beta <- beta - learning_rate * first_derivative
+    beta <- beta + learning_rate * first_derivative
     p <- 1 / (1 + exp(-X %*% beta))
   }
   
