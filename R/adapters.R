@@ -1,5 +1,5 @@
-KNN <- function(X, y, ...) {
-  structure(list(wrapped_model = gknn(x = X, y = factor(y, levels = c("TRUE", "FALSE")), ...)),
+KNN <- function(X, y, k = 5, ...) {
+  structure(list(wrapped_model = gknn(x = X, y = factor(y, levels = c("TRUE", "FALSE")), k, ...)),
             class = c("KNN", "adapted model", "scrAMbodeL"))
 }
 
