@@ -154,7 +154,7 @@ list(
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
-               ggtitle("Comparison of measures for algorithms and datasets") +
+               ggtitle("Comparison of measures for algorithms and datasets [scaled]") +
                theme_bw()),
   tar_target(CV_plot_unscaled,
              ggplot(bound_aggregates %>%
@@ -163,7 +163,7 @@ list(
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
-               ggtitle("Comparison of measures for algorithms and datasets") +
+               ggtitle("Comparison of measures for algorithms and datasets [unscaled]") +
                theme_bw()),
 
   tar_target(CV_R2_plot_scaled,
@@ -171,14 +171,14 @@ list(
                       filter(scaled),
                     aes(x = data, y = R2, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
-               ggtitle("Comparison of R2 for algorithms and datasets") +
+               ggtitle("Comparison of R2 for algorithms and datasets [scaled]") +
                theme_bw()),
   tar_target(CV_R2_plot_unscaled,
              ggplot(bound_aggregates %>%
                       filter(!scaled),
                     aes(x = data, y = R2, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
-               ggtitle("Comparison of R2 for algorithms and datasets") +
+               ggtitle("Comparison of R2 for algorithms and datasets [unscaled]") +
                theme_bw()),
   
   # Convergence analysis ----

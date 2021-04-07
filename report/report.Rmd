@@ -1,5 +1,5 @@
 ---
-author: Laura Bąkała, Dominik Rafacz
+author: Mateusz Bąkała, Dominik Rafacz
 title: Report
 output: pdf_document
 ---
