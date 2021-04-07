@@ -216,6 +216,7 @@ list(
                     aes(x = learning_rate, y = log_likelihood, color = algorithm)) +
                geom_line(size = 1.6) +
                facet_wrap(~data) +
+               scale_x_log10() +
                ggtitle("Comparison of log-likelihood for different learning rate values") +
                theme_bw()),
 
