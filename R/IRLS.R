@@ -1,4 +1,4 @@
-IRLS <- function(X, y, max_iter = 100, min_iter = 10, min_improvement = 0) {
+IRLS <- function(X, y, max_iter = 1000, min_iter = 10, min_improvement = 0) {
   X <- cbind(1, as.matrix(X))
   n <- length(y)
   y <- matrix(y, nrow = n)
@@ -20,7 +20,7 @@ IRLS <- function(X, y, max_iter = 100, min_iter = 10, min_improvement = 0) {
     beta_diff <- inverse %*% t(X) %*% (y - p)
     beta <- beta + beta_diff
     p <- 1 / (1 + exp(-X %*% beta))
-    
+
     if (all(abs(beta_diff) <= min_improvement)) break
   }
 
