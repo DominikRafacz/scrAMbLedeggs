@@ -97,15 +97,7 @@ list(
         }) %>%
         bind_rows() %>%
         select(where(~any(.x != 0))) %>%
-        select(-c(7, 21, 32, 40, 41, 49, 57, 61, 62, 70, 74, 82, 90, 91, 101,
-                  124, 125, 126, 127, 129, 132, 135, 136, 140, 141, 148, 155, 168,
-                  172, 188, 200, 202, 203, 205, 206, 207, 208, 209, 210, 211, 212,
-                  213, 214, 215, 217, 218, 219, 220, 221, 224, 225, 232, 235, 240,
-                  245, 246, 248, 252, 260, 266, 268, 272, 278, 280, 291, 292, 293,
-                  294, 295, 296, 298, 300, 303, 309, 310, 321, 329, 342, 343, 362,
-                  365, 366, 367, 370, 373, 374, 375, 376, 377, 378, 379, 380, 381,
-                  382, 383, 384, 385, 386, 387, 393, 397)
-        )
+        remove_correlated()
     },
     identity
   )),
@@ -179,6 +171,15 @@ list(
                geom_bar(stat = "identity", position = "dodge") +
                ggtitle("Comparison of R2 for algorithms and datasets") +
                theme_bw()),
+  
+  tar_target(CV_conv, perform_CV(algorithm_tbl, data_both[[1]], max_iter = num_iter),
+             pattern = cross(algorithm_tbl, data_both, num_iter)),
+  aggregated_CV_conv_target <- tar_target(aggregated_CV_conv, CV_conv %>%
+                                       select(-fold) %>%
+                                       group_by(data, algorithm, scaled, max_iter) %>%
+                                       summarise(across(everything(), mean), .groups = "drop"),
+                                     pattern = map(CV)),
+  tar_combine(conv_aggregates, aggregated_CV_conv_target),
 
   tar_render(report, "report/report.Rmd")
 )
