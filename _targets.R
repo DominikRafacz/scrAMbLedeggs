@@ -151,7 +151,7 @@ list(
   tar_target(CV_plot_scaled,
              ggplot(bound_aggregates %>%
                       filter(scaled) %>%
-                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure, R2)),
+                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
@@ -160,11 +160,26 @@ list(
   tar_target(CV_plot_unscaled,
              ggplot(bound_aggregates %>%
                       filter(!scaled) %>%
-                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure, R2)),
+                      tidyr::pivot_longer(cols = c(accuracy, precision, recall, F_measure)),
                     aes(x = data, y = value, group = algorithm, fill = algorithm)) +
                geom_bar(stat = "identity", position = "dodge") +
                facet_wrap(~name, ) +
                ggtitle("Comparison of measures for algorithms and datasets") +
+               theme_bw()),
+  
+  tar_target(CV_R2_plot_scaled,
+             ggplot(bound_aggregates %>%
+                      filter(scaled),
+                    aes(x = data, y = R2, group = algorithm, fill = algorithm)) +
+               geom_bar(stat = "identity", position = "dodge") +
+               ggtitle("Comparison of R2 for algorithms and datasets") +
+               theme_bw()),
+  tar_target(CV_R2_plot_unscaled,
+             ggplot(bound_aggregates %>%
+                      filter(!scaled),
+                    aes(x = data, y = R2, group = algorithm, fill = algorithm)) +
+               geom_bar(stat = "identity", position = "dodge") +
+               ggtitle("Comparison of R2 for algorithms and datasets") +
                theme_bw()),
 
   tar_render(report, "report/report.Rmd")
