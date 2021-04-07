@@ -21,7 +21,6 @@ perform_CV <- function(algorithm, dataset, num_folds = 5, ...) {
   
   null_log_likelihood <- map_dbl(1:num_folds, function(ind) log_likelihood(y[-inds[[ind]]], null_predictions[[ind]]$probability))
 
-  # TODO: add ... to tibble?
   tibble(fold = 1:num_folds, ...) %>%
     mutate(data = attr(dataset, "name"),
            scaled = attr(dataset, "scaled"),
