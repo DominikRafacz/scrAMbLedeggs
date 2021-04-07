@@ -61,8 +61,12 @@ list(
   tar_target(num_iter, c(50, 150, 400, 1000)),
   tar_target(algorithm_tbl, tibble::tibble(
     name = c("GD", "IRLS", "SGD", "KNN", "LDA", "QDA"),
-    value = list(GD, IRLS, SGD, KNN, LDA, QDA)
+    value = list(GD, IRLS, SGD, KNN, LDA, QDA),
+    custom = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE),
+    lrn_rate = c(TRUE, FALSE, TRUE, FALSE, FALSE, FALSE)
   )),
+  tar_target(custom_algorithm_tbl, algorithm_tbl %>% filter(custom)),
+  tar_target(lrn_rate_algorithm_tbl, algorithm_tbl %>% filter(lrn_rate)),
   tar_target(dataset_name, c("breast", "creditg", "wells", "amp", "twonorm")),
   tar_target(dataset_target_index, c(1, 21, 5, 10, 21)),
   tar_target(dataset_positive_class, c("M", "bad", "exploration", "YES", "1")),
@@ -172,8 +176,8 @@ list(
                ggtitle("Comparison of R2 for algorithms and datasets") +
                theme_bw()),
   
-  tar_target(CV_conv, perform_CV(algorithm_tbl, data_both[[1]], max_iter = num_iter),
-             pattern = cross(algorithm_tbl, data_both, num_iter)),
+  tar_target(CV_conv, perform_CV(custom_algorithm_tbl, data_both[[1]], max_iter = num_iter),
+             pattern = cross(custom_algorithm_tbl, data_both, num_iter)),
   aggregated_CV_conv_target <- tar_target(aggregated_CV_conv, CV_conv %>%
                                        select(-fold) %>%
                                        group_by(data, algorithm, scaled, max_iter) %>%
