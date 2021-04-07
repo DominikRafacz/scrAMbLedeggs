@@ -27,7 +27,8 @@ tar_option_set(
     "tibble",
     "tidyr",
     "dplyr"
-    )
+  ),
+  error = "continue"
 )
 
 library(rlang)
@@ -57,8 +58,9 @@ paste_dataset_names <- function() {
 
 set.seed(2137)
 list(
-  #defining some constants
+  # Constants (modifiable, though) ----
   tar_target(num_iter, c(50, 150, 400, 1000)),
+  tar_target(learning_rate, c(.001, .004, .01, .04, .1)),
   tar_target(algorithm_tbl, tibble::tibble(
     name = c("GD", "IRLS", "SGD", "KNN", "LDA", "QDA"),
     value = list(GD, IRLS, SGD, KNN, LDA, QDA),
@@ -112,6 +114,8 @@ list(
     identity,
     identity
   )),
+  
+  # Data import and processing ----
   data_unscaled_target <- tar_target(
     data_unscaled,
     dataset(dataset_name,
@@ -132,6 +136,7 @@ list(
   tar_combine(data_both, data_unscaled_target, data_scaled_target,
               command = vctrs::vec_c(!!!.x, .name_spec = "{inner}")),
   
+  # Basic crossvalidation ----
   tar_target(CV, perform_CV(algorithm_tbl, data_both[[1]]),
              pattern = cross(algorithm_tbl, data_both)),
   aggregated_CV_target <- tar_target(aggregated_CV, CV %>%
@@ -141,7 +146,7 @@ list(
              pattern = map(CV)),
   tar_combine(bound_aggregates, aggregated_CV_target),
   
-  ##visualizing results
+  # CV results visualized ----
   tar_target(CV_plot_scaled,
              ggplot(bound_aggregates %>%
                       filter(scaled) %>%
@@ -176,14 +181,44 @@ list(
                ggtitle("Comparison of R2 for algorithms and datasets") +
                theme_bw()),
   
+  # Convergence analysis ----
   tar_target(CV_conv, perform_CV(custom_algorithm_tbl, data_both[[1]], max_iter = num_iter),
              pattern = cross(custom_algorithm_tbl, data_both, num_iter)),
   aggregated_CV_conv_target <- tar_target(aggregated_CV_conv, CV_conv %>%
                                        select(-fold) %>%
                                        group_by(data, algorithm, scaled, max_iter) %>%
                                        summarise(across(everything(), mean), .groups = "drop"),
-                                     pattern = map(CV)),
+                                     pattern = map(CV_conv)),
   tar_combine(conv_aggregates, aggregated_CV_conv_target),
+  
+  tar_target(CV_conv_plot,
+             ggplot(conv_aggregates %>%
+                      filter(scaled),
+                    aes(x = max_iter, y = log_likelihood, color = algorithm)) +
+               geom_line(size = 1.6) +
+               facet_wrap(~data) +
+               ggtitle("Comparison of log-likelihood for different max iter values") +
+               theme_bw()),
+  
+  # Learning rate exploration ----
+  tar_target(CV_lr, perform_CV(lrn_rate_algorithm_tbl, data_both[[1]], learning_rate = learning_rate),
+             pattern = cross(lrn_rate_algorithm_tbl, data_both, learning_rate)),
+  aggregated_CV_lr_target <- tar_target(aggregated_CV_lr, CV_lr %>%
+                                          select(-fold) %>%
+                                          group_by(data, algorithm, scaled, learning_rate) %>%
+                                          summarise(across(everything(), mean), .groups = "drop"),
+                                        pattern = map(CV_lr)),
+  tar_combine(lr_aggregates, aggregated_CV_lr_target),
+  
+  tar_target(CV_lr_plot,
+             ggplot(lr_aggregates %>%
+                      filter(scaled),
+                    aes(x = learning_rate, y = log_likelihood, color = algorithm)) +
+               geom_line(size = 1.6) +
+               facet_wrap(~data) +
+               ggtitle("Comparison of log-likelihood for different learning rate values") +
+               theme_bw()),
 
+  # Report generation ----
   tar_render(report, "report/report.Rmd")
 )
